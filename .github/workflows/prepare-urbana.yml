@@ -1,0 +1,26 @@
+name: Prepare David Penn
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '17 18,19,20,21 * * 5'
+permissions:
+  contents: read
+concurrency:
+  group: david-penn
+  cancel-in-progress: false
+jobs:
+  prepare:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: sudo apt-get update -qq && sudo apt-get install -y ffmpeg
+      - run: python -m pip install 'boto3>=1.35,<2'
+      - run: python prepare_penn.py
+        env:
+          R2_ENDPOINT: ${{ secrets.R2_ENDPOINT }}
+          R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+          R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
